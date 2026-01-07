@@ -7,6 +7,7 @@ import { readSkill } from './commands/read.js';
 import { removeSkill } from './commands/remove.js';
 import { manageSkills } from './commands/manage.js';
 import { syncAgentsMd } from './commands/sync.js';
+import { updateCommand } from './commands/update.js';
 
 const program = new Command();
 
@@ -67,5 +68,12 @@ program
   .alias('rm')
   .description('Remove specific skill (for scripts, use manage for interactive)')
   .action(removeSkill);
+
+program
+  .command('update')
+  .description('Update skills from their git sources')
+  .option('-a, --all', 'Update all updateable skills without prompting')
+  .option('-y, --yes', 'Skip confirmation prompts')
+  .action(updateCommand);
 
 program.parse();
