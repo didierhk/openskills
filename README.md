@@ -4,6 +4,10 @@
 [![npm downloads](https://img.shields.io/npm/dm/openskills.svg)](https://www.npmjs.com/package/openskills)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+> **📢 Fork Notice:** This is an enhanced fork of [numman-ali/openskills](https://github.com/numman-ali/openskills) with additional features including code quality tooling, runtime validation, skill update command, and comprehensive testing. See [FORK.md](./FORK.md) and [ENHANCEMENTS.md](./ENHANCEMENTS.md) for details.
+>
+> **Original Author:** Numman Ali ([@nummanali](https://x.com/nummanali))
+
 **The closest implementation matching Claude Code's skills system** — same prompt format, same marketplace, same folders, just using CLI instead of tools.
 
 ```bash
