@@ -1,12 +1,22 @@
-import { readFileSync, readdirSync, existsSync, mkdirSync, rmSync, cpSync, statSync } from 'fs';
+import {
+  readFileSync,
+  readdirSync,
+  existsSync,
+  mkdirSync,
+  rmSync,
+  cpSync,
+  statSync,
+  mkdtempSync,
+} from 'fs';
 import { join, basename, resolve, sep } from 'path';
-import { homedir } from 'os';
-import { execSync } from 'child_process';
+import { homedir, tmpdir } from 'os';
+import { spawnSync } from 'child_process';
 import chalk from 'chalk';
 import ora from 'ora';
 import { checkbox, confirm } from '@inquirer/prompts';
 import { ExitPromptError } from '@inquirer/core';
 import { hasValidFrontmatter, extractYamlField } from '../utils/yaml.js';
+import { validateGitUrl, validateSkillSubpath } from '../utils/input-validation.js';
 import { ANTHROPIC_MARKETPLACE_SKILLS } from '../utils/marketplace-skills.js';
 import type { InstallOptions } from '../types.js';
 
@@ -82,7 +92,15 @@ export async function installSkill(source: string, options: InstallOptions): Pro
       repoUrl = `https://github.com/${source}`;
     } else if (parts.length > 2) {
       repoUrl = `https://github.com/${parts[0]}/${parts[1]}`;
-      skillSubpath = parts.slice(2).join('/');
+      const rawSubpath = parts.slice(2).join('/');
+
+      // Validate and normalize subpath to prevent path traversal
+      try {
+        skillSubpath = validateSkillSubpath(rawSubpath);
+      } catch (error) {
+        console.error(chalk.red(`Error: ${(error as Error).message}`));
+        process.exit(1);
+      }
     } else {
       console.error(chalk.red('Error: Invalid source format'));
       console.error('Expected: owner/repo, owner/repo/skill-name, git URL, or local path');
@@ -90,23 +108,47 @@ export async function installSkill(source: string, options: InstallOptions): Pro
     }
   }
 
+  // Validate git URL before use (prevent command injection)
+  try {
+    validateGitUrl(repoUrl);
+  } catch (error) {
+    console.error(chalk.red(`Error: ${(error as Error).message}`));
+    process.exit(1);
+  }
+
   // Clone and install from git
-  const tempDir = join(homedir(), `.openskills-temp-${Date.now()}`);
-  mkdirSync(tempDir, { recursive: true });
+  // Use cryptographically random temp directory to prevent TOCTOU attacks
+  const tempDir = mkdtempSync(join(tmpdir(), 'openskills-'));
 
   try {
     const spinner = ora('Cloning repository...').start();
     try {
-      execSync(`git clone --depth 1 --quiet "${repoUrl}" "${tempDir}/repo"`, {
-        stdio: 'pipe',
-      });
-      spinner.succeed('Repository cloned');
-    } catch (error) {
-      spinner.fail('Failed to clone repository');
-      const err = error as { stderr?: Buffer };
-      if (err.stderr) {
-        console.error(chalk.dim(err.stderr.toString().trim()));
+      // Use spawnSync with array arguments to prevent command injection
+      const result = spawnSync(
+        'git',
+        ['clone', '--depth', '1', '--quiet', repoUrl, join(tempDir, 'repo')],
+        {
+          stdio: 'pipe',
+          encoding: 'utf-8',
+        }
+      );
+
+      if (result.error || result.status !== 0) {
+        spinner.fail('Failed to clone repository');
+        if (result.stderr) {
+          console.error(chalk.dim(result.stderr.trim()));
+        }
+        console.error(
+          chalk.yellow(
+            '\nTip: For private repos, ensure git SSH keys or credentials are configured'
+          )
+        );
+        process.exit(1);
       }
+
+      spinner.succeed('Repository cloned');
+    } catch {
+      spinner.fail('Failed to clone repository');
       console.error(
         chalk.yellow('\nTip: For private repos, ensure git SSH keys or credentials are configured')
       );

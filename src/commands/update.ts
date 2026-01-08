@@ -1,11 +1,12 @@
-import { existsSync, readFileSync, rmSync } from 'fs';
+import { existsSync, readFileSync, rmSync, mkdtempSync, renameSync, cpSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
-import { execSync } from 'child_process';
+import { tmpdir } from 'os';
+import { spawnSync } from 'child_process';
 import chalk from 'chalk';
 import ora from 'ora';
 import { checkbox, confirm } from '@inquirer/prompts';
 import { ExitPromptError } from '@inquirer/core';
+import { validateGitUrl } from '../utils/input-validation.js';
 import { findAllSkills } from '../utils/skills.js';
 import type { Skill } from '../types.js';
 
@@ -64,28 +65,59 @@ async function updateSkill(skill: Skill): Promise<boolean> {
     return false;
   }
 
-  const tempDir = join(homedir(), `.openskills-temp-${Date.now()}`);
+  // Validate git URL before use (prevent command injection)
+  try {
+    validateGitUrl(metadata.source);
+  } catch (error) {
+    console.error(chalk.red(`Cannot update ${skill.name}: ${(error as Error).message}`));
+    return false;
+  }
+
+  // Use cryptographically random temp directory to prevent TOCTOU attacks
+  const tempDir = mkdtempSync(join(tmpdir(), 'openskills-'));
   const spinner = ora(`Updating ${skill.name}...`).start();
 
   try {
-    // Clone latest version
-    execSync(`git clone --depth 1 --quiet "${metadata.source}" "${tempDir}"`, {
-      stdio: 'pipe',
-    });
+    // Clone latest version using spawnSync to prevent command injection
+    const result = spawnSync(
+      'git',
+      ['clone', '--depth', '1', '--quiet', metadata.source, tempDir],
+      {
+        stdio: 'pipe',
+        encoding: 'utf-8',
+      }
+    );
+
+    if (result.error || result.status !== 0) {
+      spinner.fail(chalk.red(`Failed to update ${skill.name}`));
+      if (result.stderr) {
+        console.error(chalk.dim(result.stderr.trim()));
+      }
+      // Cleanup temp directory
+      rmSync(tempDir, { recursive: true, force: true });
+      return false;
+    }
 
     // Remove old version
     rmSync(skill.path, { recursive: true, force: true });
 
-    // Move new version into place
-    execSync(`mv "${tempDir}" "${skill.path}"`, { stdio: 'pipe' });
+    // Move new version into place using Node.js native functions (not shell commands)
+    try {
+      renameSync(tempDir, skill.path);
+    } catch {
+      // Handle cross-device moves by copying then removing
+      cpSync(tempDir, skill.path, { recursive: true, dereference: true });
+      rmSync(tempDir, { recursive: true, force: true });
+    }
 
     spinner.succeed(chalk.green(`✅ Updated: ${skill.name}`));
     return true;
   } catch (error) {
     spinner.fail(chalk.red(`Failed to update ${skill.name}`));
-    const err = error as { stderr?: Buffer };
-    if (err.stderr) {
-      console.error(chalk.dim(err.stderr.toString().trim()));
+    console.error(chalk.dim((error as Error).message));
+    // Cleanup temp directory if it still exists
+    if (existsSync(tempDir)) {
+      rmSync(tempDir, { recursive: true, force: true });
     }
     return false;
   }

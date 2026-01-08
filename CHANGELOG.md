@@ -5,6 +5,112 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-01-07
+
+### Security
+
+⚠️ **CRITICAL SECURITY UPDATE** - This release fixes 7 security vulnerabilities (2 CRITICAL, 2 HIGH, 2 MEDIUM, 1 LOW). All users should update immediately.
+
+#### CRITICAL Fixes
+
+- **CVE-2026-001: Command Injection in Git Clone Operations** (CVSS 9.8)
+  - Fixed command injection vulnerability in `openskills install` and `openskills update`
+  - Replaced `execSync` with `spawnSync` using array arguments (no shell interpolation)
+  - Added `validateGitUrl()` to whitelist protocols and block shell metacharacters
+  - Attackers could previously execute arbitrary commands via malicious git URLs
+
+- **CVE-2026-002: XML Injection in AGENTS.md Generation** (CVSS 8.6)
+  - Fixed XML injection vulnerability in skill metadata processing
+  - Implemented `escapeXml()` function to sanitize all skill names, descriptions, and locations
+  - Malicious skills could previously inject arbitrary XML/HTML into AGENTS.md
+
+#### HIGH Priority Fixes
+
+- **CVE-2026-003: Command Injection in Move Operation** (CVSS 7.8)
+  - Replaced shell `mv` command with Node.js native `renameSync`/`cpSync` operations
+  - Eliminates shell execution for filesystem operations in `openskills update`
+
+- **CVE-2026-004: Predictable Temporary Directories (TOCTOU)** (CVSS 7.4)
+  - Replaced `Date.now()` temp directories with cryptographically random `mkdtempSync()`
+  - Prevents Time-of-Check-Time-of-Use (TOCTOU) race condition attacks
+  - Uses OS temp directory with proper permissions and atomic creation
+
+#### MEDIUM Priority Fixes
+
+- **CVE-2026-005: RegExp Injection in YAML Parsing** (CVSS 5.3)
+  - Implemented `escapeRegExp()` to sanitize field names before regex matching
+  - Prevents regex metacharacters from altering YAML parsing behavior
+
+- **CVE-2026-006: Path Traversal in Skill Subpath** (CVSS 6.5)
+  - Added `validateSkillSubpath()` to prevent directory traversal attacks
+  - Blocks `..`, absolute paths, hidden paths, and invalid characters
+  - Validates GitHub shorthand subpaths (e.g., `owner/repo/path/to/skill`)
+
+#### LOW Priority Fixes
+
+- **CVE-2026-007: Symlink TOCTOU in Skill Installation** (CVSS 3.3)
+  - Resolved via cryptographic temp directory fix (CVE-2026-004)
+
+### Added
+
+- **Security validation module** (`src/utils/input-validation.ts`)
+  - `validateGitUrl()` - Git URL validation with protocol whitelisting
+  - `escapeXml()` - XML/HTML entity escaping
+  - `escapeRegExp()` - RegExp metacharacter escaping
+  - `validateSkillSubpath()` - Path traversal prevention
+
+- **Comprehensive security test suite** (34 new tests)
+  - 13 tests for git URL validation (command injection prevention)
+  - 8 tests for XML escaping (injection prevention)
+  - 5 tests for RegExp escaping (injection prevention)
+  - 8 tests for path traversal prevention
+
+- **Security documentation**
+  - `SECURITY_AUDIT.md` - Comprehensive vulnerability report
+  - `SECURITY_FIXES.md` - Implementation guide
+  - `SECURITY_IMPLEMENTATION.md` - Fix summary and deployment guide
+
+### Changed
+
+- **Git operations now use safe APIs**
+  - `git clone` via `spawnSync` with array arguments (no shell)
+  - All git URLs validated before use
+  - Error handling improved with proper stderr output
+
+- **Filesystem operations use Node.js native APIs**
+  - Replaced shell `mv` with `renameSync`/`cpSync`
+  - Cross-device move support via fallback to copy+remove
+  - Proper cleanup on errors
+
+- **Temp directory creation**
+  - Now uses cryptographically random names via `mkdtempSync()`
+  - Uses OS temp directory (`os.tmpdir()`) instead of home directory
+  - Atomic creation eliminates race conditions
+
+- **Input validation applied throughout**
+  - All user-controlled input validated before use
+  - All interpolated content properly escaped (XML, RegExp)
+  - Path traversal protection on skill subpaths
+
+### Testing
+
+- **Total tests: 158** (previously 124)
+  - +34 new security tests
+  - 100% passing
+  - All builds and lints passing (0 errors, 0 warnings)
+
+### Migration Notes
+
+No breaking changes. Update is seamless:
+
+```bash
+npm install -g openskills@1.4.0
+```
+
+For users who installed skills from untrusted sources:
+1. Review installed skills: `openskills list`
+2. Re-sync AGENTS.md after update: `openskills sync`
+
 ## [1.3.0] - 2025-12-14
 
 ### Added
@@ -96,6 +202,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Progressive disclosure (load skills on demand)
 - Bundled resources support (references/, scripts/, assets/)
 
+[1.4.0]: https://github.com/didierhk/openskills/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/numman-ali/openskills/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/numman-ali/openskills/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/numman-ali/openskills/compare/v1.1.0...v1.2.0

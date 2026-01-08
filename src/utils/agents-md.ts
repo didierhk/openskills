@@ -1,4 +1,5 @@
 import type { Skill } from '../types.js';
+import { escapeXml } from './input-validation.js';
 
 /**
  * Parse skill names currently in AGENTS.md
@@ -24,9 +25,9 @@ export function generateSkillsXml(skills: Skill[]): string {
   const skillTags = skills
     .map(
       (s) => `<skill>
-<name>${s.name}</name>
-<description>${s.description}</description>
-<location>${s.location}</location>
+<name>${escapeXml(s.name)}</name>
+<description>${escapeXml(s.description)}</description>
+<location>${escapeXml(s.location)}</location>
 </skill>`
     )
     .join('\n\n');
