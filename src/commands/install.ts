@@ -51,9 +51,7 @@ function expandPath(source: string): string {
 export async function installSkill(source: string, options: InstallOptions): Promise<void> {
   const folder = options.universal ? '.agent/skills' : '.claude/skills';
   const isProject = !options.global; // Default to project unless --global specified
-  const targetDir = isProject
-    ? join(process.cwd(), folder)
-    : join(homedir(), folder);
+  const targetDir = isProject ? join(process.cwd(), folder) : join(homedir(), folder);
 
   const location = isProject
     ? chalk.blue(`project (${folder})`)
@@ -109,7 +107,9 @@ export async function installSkill(source: string, options: InstallOptions): Pro
       if (err.stderr) {
         console.error(chalk.dim(err.stderr.toString().trim()));
       }
-      console.error(chalk.yellow('\nTip: For private repos, ensure git SSH keys or credentials are configured'));
+      console.error(
+        chalk.yellow('\nTip: For private repos, ensure git SSH keys or credentials are configured')
+      );
       process.exit(1);
     }
 
@@ -140,7 +140,11 @@ function printPostInstallHints(isProject: boolean): void {
 /**
  * Install from local path (directory containing skills or single skill)
  */
-async function installFromLocal(localPath: string, targetDir: string, options: InstallOptions): Promise<void> {
+async function installFromLocal(
+  localPath: string,
+  targetDir: string,
+  options: InstallOptions
+): Promise<void> {
   if (!existsSync(localPath)) {
     console.error(chalk.red(`Error: Path does not exist: ${localPath}`));
     process.exit(1);
@@ -360,7 +364,12 @@ async function installFromRepo(
 
   for (const info of skillsToInstall) {
     // Warn about conflicts
-    const shouldInstall = await warnIfConflict(info.skillName, info.targetPath, isProject, options.yes);
+    const shouldInstall = await warnIfConflict(
+      info.skillName,
+      info.targetPath,
+      isProject,
+      options.yes
+    );
     if (!shouldInstall) {
       console.log(chalk.yellow(`Skipped: ${info.skillName}`));
       continue; // Skip this skill, continue with next
@@ -387,7 +396,12 @@ async function installFromRepo(
  * Warn if installing could conflict with Claude Code marketplace
  * Returns true if should proceed, false if should skip
  */
-async function warnIfConflict(skillName: string, targetPath: string, isProject: boolean, skipPrompt = false): Promise<boolean> {
+async function warnIfConflict(
+  skillName: string,
+  targetPath: string,
+  isProject: boolean,
+  skipPrompt = false
+): Promise<boolean> {
   // Check if overwriting existing skill
   if (existsSync(targetPath)) {
     if (skipPrompt) {
@@ -415,7 +429,9 @@ async function warnIfConflict(skillName: string, targetPath: string, isProject: 
 
   // Warn about marketplace conflicts (global install only)
   if (!isProject && ANTHROPIC_MARKETPLACE_SKILLS.includes(skillName)) {
-    console.warn(chalk.yellow(`\n⚠️  Warning: '${skillName}' matches an Anthropic marketplace skill`));
+    console.warn(
+      chalk.yellow(`\n⚠️  Warning: '${skillName}' matches an Anthropic marketplace skill`)
+    );
     console.warn(chalk.dim('   Installing globally may conflict with Claude Code plugins.'));
     console.warn(chalk.dim('   If you re-enable Claude plugins, this will be overwritten.'));
     console.warn(chalk.dim('   Recommend: Use --project flag for conflict-free installation.\n'));

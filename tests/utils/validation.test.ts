@@ -30,9 +30,9 @@ describe('validation utilities', () => {
     });
 
     it('should allow nested subdirectories', () => {
-      expect(
-        validatePathSecurity('/home/user/skills/category/my-skill', '/home/user/skills')
-      ).toBe(true);
+      expect(validatePathSecurity('/home/user/skills/category/my-skill', '/home/user/skills')).toBe(
+        true
+      );
     });
 
     it('should handle relative paths correctly', () => {

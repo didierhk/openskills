@@ -144,11 +144,15 @@ describe('install.ts helper functions', () => {
     };
 
     it('should allow normal skill paths within target directory', () => {
-      expect(isPathSafe('/home/user/.claude/skills/my-skill', '/home/user/.claude/skills')).toBe(true);
+      expect(isPathSafe('/home/user/.claude/skills/my-skill', '/home/user/.claude/skills')).toBe(
+        true
+      );
     });
 
     it('should block path traversal attempts with ../', () => {
-      expect(isPathSafe('/home/user/.claude/skills/../../../etc/passwd', '/home/user/.claude/skills')).toBe(false);
+      expect(
+        isPathSafe('/home/user/.claude/skills/../../../etc/passwd', '/home/user/.claude/skills')
+      ).toBe(false);
     });
 
     it('should block paths outside target directory', () => {
@@ -161,14 +165,18 @@ describe('install.ts helper functions', () => {
     });
 
     it('should allow nested subdirectories', () => {
-      expect(isPathSafe('/home/user/.claude/skills/category/my-skill', '/home/user/.claude/skills')).toBe(true);
+      expect(
+        isPathSafe('/home/user/.claude/skills/category/my-skill', '/home/user/.claude/skills')
+      ).toBe(true);
     });
   });
 });
 
 describe('GitHub shorthand parsing', () => {
   // Test the parsing logic for owner/repo and owner/repo/path
-  const parseGitHubShorthand = (source: string): { repoUrl: string; skillSubpath: string } | null => {
+  const parseGitHubShorthand = (
+    source: string
+  ): { repoUrl: string; skillSubpath: string } | null => {
     const parts = source.split('/');
     if (parts.length === 2) {
       return {

@@ -20,7 +20,12 @@ describe('sync utilities (agents-md.ts)', () => {
     it('should generate valid XML for skills', () => {
       const skills: Skill[] = [
         { name: 'pdf', description: 'PDF manipulation', location: 'project', path: '/path/to/pdf' },
-        { name: 'xlsx', description: 'Spreadsheet editing', location: 'global', path: '/path/to/xlsx' },
+        {
+          name: 'xlsx',
+          description: 'Spreadsheet editing',
+          location: 'global',
+          path: '/path/to/xlsx',
+        },
       ];
 
       const xml = generateSkillsXml(skills);
@@ -180,12 +185,7 @@ describe('sync --output flag logic', () => {
 
   describe('output path validation', () => {
     it('should accept .md files', () => {
-      const validPaths = [
-        'AGENTS.md',
-        'custom.md',
-        '.ruler/AGENTS.md',
-        'docs/rules.md',
-      ];
+      const validPaths = ['AGENTS.md', 'custom.md', '.ruler/AGENTS.md', 'docs/rules.md'];
 
       for (const path of validPaths) {
         expect(path.endsWith('.md')).toBe(true);
@@ -193,12 +193,7 @@ describe('sync --output flag logic', () => {
     });
 
     it('should reject non-.md files', () => {
-      const invalidPaths = [
-        'AGENTS.txt',
-        'rules.yaml',
-        'config.json',
-        'noextension',
-      ];
+      const invalidPaths = ['AGENTS.txt', 'rules.yaml', 'config.json', 'noextension'];
 
       for (const path of invalidPaths) {
         expect(path.endsWith('.md')).toBe(false);

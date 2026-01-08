@@ -4,8 +4,12 @@ import chalk from 'chalk';
 import { checkbox } from '@inquirer/prompts';
 import { ExitPromptError } from '@inquirer/core';
 import { findAllSkills } from '../utils/skills.js';
-import { generateSkillsXml, replaceSkillsSection, parseCurrentSkills, removeSkillsSection } from '../utils/agents-md.js';
-import type { Skill } from '../types.js';
+import {
+  generateSkillsXml,
+  replaceSkillsSection,
+  parseCurrentSkills,
+  removeSkillsSection,
+} from '../utils/agents-md.js';
 
 export interface SyncOptions {
   yes?: boolean;
@@ -63,7 +67,9 @@ export async function syncAgentsMd(options: SyncOptions = {}): Promise<void> {
         value: skill.name,
         description: skill.description.slice(0, 70),
         // Pre-select if currently in file, otherwise default to project skills
-        checked: currentSkills.includes(skill.name) || (currentSkills.length === 0 && skill.location === 'project'),
+        checked:
+          currentSkills.includes(skill.name) ||
+          (currentSkills.length === 0 && skill.location === 'project'),
       }));
 
       const selected = await checkbox({
@@ -104,6 +110,8 @@ export async function syncAgentsMd(options: SyncOptions = {}): Promise<void> {
   if (hadMarkers) {
     console.log(chalk.green(`✅ Synced ${skills.length} skill(s) to ${outputName}`));
   } else {
-    console.log(chalk.green(`✅ Added skills section to ${outputName} (${skills.length} skill(s))`));
+    console.log(
+      chalk.green(`✅ Added skills section to ${outputName} (${skills.length} skill(s))`)
+    );
   }
 }

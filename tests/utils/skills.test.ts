@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mkdirSync, writeFileSync, symlinkSync, rmSync, existsSync } from 'fs';
+import { mkdirSync, writeFileSync, symlinkSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { findAllSkills, findSkill } from '../../src/utils/skills.js';
@@ -110,7 +110,7 @@ describe('skills.ts', () => {
       const skills = findAllSkills();
 
       expect(skills).toHaveLength(2);
-      const names = skills.map(s => s.name);
+      const names = skills.map((s) => s.name);
       expect(names).toContain('regular-skill');
       expect(names).toContain('symlinked-skill');
     });

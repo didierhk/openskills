@@ -29,9 +29,9 @@ describe('getSearchDirs', () => {
   it('should return all 4 dirs in priority order', () => {
     const dirs = getSearchDirs();
     expect(dirs).toHaveLength(4);
-    expect(dirs[0]).toBe(join(process.cwd(), '.agent/skills'));   // 1. Project universal
-    expect(dirs[1]).toBe(join(homedir(), '.agent/skills'));        // 2. Global universal
-    expect(dirs[2]).toBe(join(process.cwd(), '.claude/skills'));  // 3. Project claude
-    expect(dirs[3]).toBe(join(homedir(), '.claude/skills'));       // 4. Global claude
+    expect(dirs[0]).toBe(join(process.cwd(), '.agent/skills')); // 1. Project universal
+    expect(dirs[1]).toBe(join(homedir(), '.agent/skills')); // 2. Global universal
+    expect(dirs[2]).toBe(join(process.cwd(), '.claude/skills')); // 3. Project claude
+    expect(dirs[3]).toBe(join(homedir(), '.claude/skills')); // 4. Global claude
   });
 });

@@ -18,10 +18,17 @@ program
   .showHelpAfterError(false)
   .exitOverride((err) => {
     // Handle all commander errors gracefully (no stack traces)
-    if (err.code === 'commander.helpDisplayed' || err.code === 'commander.help' || err.code === 'commander.version') {
+    if (
+      err.code === 'commander.helpDisplayed' ||
+      err.code === 'commander.help' ||
+      err.code === 'commander.version'
+    ) {
       process.exit(0);
     }
-    if (err.code === 'commander.missingArgument' || err.code === 'commander.missingMandatoryOptionValue') {
+    if (
+      err.code === 'commander.missingArgument' ||
+      err.code === 'commander.missingMandatoryOptionValue'
+    ) {
       // Error already displayed by commander
       process.exit(1);
     }
@@ -33,10 +40,7 @@ program
     process.exit(err.exitCode || 1);
   });
 
-program
-  .command('list')
-  .description('List all installed skills')
-  .action(listSkills);
+program.command('list').description('List all installed skills').action(listSkills);
 
 program
   .command('install <source>')

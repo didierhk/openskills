@@ -65,7 +65,6 @@ ${skillTags}
  */
 export function replaceSkillsSection(content: string, newSection: string): string {
   const startMarker = '<skills_system';
-  const endMarker = '</skills_system>';
 
   // Check for XML markers
   if (content.includes(startMarker)) {
@@ -80,10 +79,7 @@ export function replaceSkillsSection(content: string, newSection: string): strin
   if (content.includes(htmlStartMarker)) {
     // Extract content without outer XML wrapper
     const innerContent = newSection.replace(/<skills_system[^>]*>|<\/skills_system>/g, '');
-    const regex = new RegExp(
-      `${htmlStartMarker}[\\s\\S]*?${htmlEndMarker}`,
-      'g'
-    );
+    const regex = new RegExp(`${htmlStartMarker}[\\s\\S]*?${htmlEndMarker}`, 'g');
     return content.replace(regex, `${htmlStartMarker}\n${innerContent}\n${htmlEndMarker}`);
   }
 
@@ -96,7 +92,6 @@ export function replaceSkillsSection(content: string, newSection: string): strin
  */
 export function removeSkillsSection(content: string): string {
   const startMarker = '<skills_system';
-  const endMarker = '</skills_system>';
 
   // Check for XML markers
   if (content.includes(startMarker)) {
@@ -109,11 +104,11 @@ export function removeSkillsSection(content: string): string {
   const htmlEndMarker = '<!-- SKILLS_TABLE_END -->';
 
   if (content.includes(htmlStartMarker)) {
-    const regex = new RegExp(
-      `${htmlStartMarker}[\\s\\S]*?${htmlEndMarker}`,
-      'g'
+    const regex = new RegExp(`${htmlStartMarker}[\\s\\S]*?${htmlEndMarker}`, 'g');
+    return content.replace(
+      regex,
+      `${htmlStartMarker}\n<!-- Skills section removed -->\n${htmlEndMarker}`
     );
-    return content.replace(regex, `${htmlStartMarker}\n<!-- Skills section removed -->\n${htmlEndMarker}`);
   }
 
   // No markers found - nothing to remove

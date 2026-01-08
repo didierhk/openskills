@@ -215,10 +215,7 @@ describe('End-to-end CLI tests', () => {
       // Create symlink in skills directory
       const skillsDir = join(testTempDir, '.claude', 'skills');
       mkdirSync(skillsDir, { recursive: true });
-      symlinkSync(
-        join(actualSkillDir, 'symlinked-skill'),
-        join(skillsDir, 'symlinked-skill')
-      );
+      symlinkSync(join(actualSkillDir, 'symlinked-skill'), join(skillsDir, 'symlinked-skill'));
 
       const result = runCli('list');
 
@@ -232,10 +229,7 @@ describe('End-to-end CLI tests', () => {
 
       const skillsDir = join(testTempDir, '.claude', 'skills');
       mkdirSync(skillsDir, { recursive: true });
-      symlinkSync(
-        join(actualSkillDir, 'linked-readable'),
-        join(skillsDir, 'linked-readable')
-      );
+      symlinkSync(join(actualSkillDir, 'linked-readable'), join(skillsDir, 'linked-readable'));
 
       const result = runCli('read linked-readable');
 

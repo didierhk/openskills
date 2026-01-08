@@ -10,11 +10,11 @@ export const SkillFrontmatterSchema = z.object({
     .min(1, 'Skill name cannot be empty')
     .max(100, 'Skill name too long')
     .regex(/^[a-z0-9-]+$/, 'Skill name must be lowercase alphanumeric with hyphens'),
-  description: z
+  description: z.string().min(1, 'Description cannot be empty').max(500, 'Description too long'),
+  version: z
     .string()
-    .min(1, 'Description cannot be empty')
-    .max(500, 'Description too long'),
-  version: z.string().regex(/^\d+\.\d+\.\d+$/, 'Version must be semantic (e.g., 1.0.0)').optional(),
+    .regex(/^\d+\.\d+\.\d+$/, 'Version must be semantic (e.g., 1.0.0)')
+    .optional(),
   author: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -26,20 +26,24 @@ export type SkillFrontmatter = z.infer<typeof SkillFrontmatterSchema>;
  */
 export const InstallSourceSchema = z.union([
   // Local path (absolute, relative, or tilde)
-  z.string().refine(
-    (s) => s.startsWith('/') || s.startsWith('./') || s.startsWith('../') || s.startsWith('~/'),
-    { message: 'Invalid local path' }
-  ),
+  z
+    .string()
+    .refine(
+      (s) => s.startsWith('/') || s.startsWith('./') || s.startsWith('../') || s.startsWith('~/'),
+      { message: 'Invalid local path' }
+    ),
   // Git URL (SSH, HTTPS, git://)
-  z.string().refine(
-    (s) =>
-      s.startsWith('git@') ||
-      s.startsWith('git://') ||
-      s.startsWith('http://') ||
-      s.startsWith('https://') ||
-      s.endsWith('.git'),
-    { message: 'Invalid git URL' }
-  ),
+  z
+    .string()
+    .refine(
+      (s) =>
+        s.startsWith('git@') ||
+        s.startsWith('git://') ||
+        s.startsWith('http://') ||
+        s.startsWith('https://') ||
+        s.endsWith('.git'),
+      { message: 'Invalid git URL' }
+    ),
   // GitHub shorthand (owner/repo or owner/repo/path)
   z.string().regex(/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+(\/[\w\-./]+)?$/, {
     message: 'Invalid GitHub shorthand (expected: owner/repo or owner/repo/path)',

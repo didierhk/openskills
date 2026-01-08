@@ -12,8 +12,12 @@ export function listSkills(): void {
   if (skills.length === 0) {
     console.log('No skills installed.\n');
     console.log('Install skills:');
-    console.log(`  ${chalk.cyan('openskills install anthropics/skills')}         ${chalk.dim('# Project (default)')}`);
-    console.log(`  ${chalk.cyan('openskills install owner/skill --global')}     ${chalk.dim('# Global (advanced)')}`);
+    console.log(
+      `  ${chalk.cyan('openskills install anthropics/skills')}         ${chalk.dim('# Project (default)')}`
+    );
+    console.log(
+      `  ${chalk.cyan('openskills install owner/skill --global')}     ${chalk.dim('# Global (advanced)')}`
+    );
     return;
   }
 
@@ -27,17 +31,18 @@ export function listSkills(): void {
 
   // Display with inline location labels
   for (const skill of sorted) {
-    const locationLabel = skill.location === 'project'
-      ? chalk.blue('(project)')
-      : chalk.dim('(global)');
+    const locationLabel =
+      skill.location === 'project' ? chalk.blue('(project)') : chalk.dim('(global)');
 
     console.log(`  ${chalk.bold(skill.name.padEnd(25))} ${locationLabel}`);
     console.log(`    ${chalk.dim(skill.description)}\n`);
   }
 
   // Summary
-  const projectCount = skills.filter(s => s.location === 'project').length;
-  const globalCount = skills.filter(s => s.location === 'global').length;
+  const projectCount = skills.filter((s) => s.location === 'project').length;
+  const globalCount = skills.filter((s) => s.location === 'global').length;
 
-  console.log(chalk.dim(`Summary: ${projectCount} project, ${globalCount} global (${skills.length} total)`));
+  console.log(
+    chalk.dim(`Summary: ${projectCount} project, ${globalCount} global (${skills.length} total)`)
+  );
 }
