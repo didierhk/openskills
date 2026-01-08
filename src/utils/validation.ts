@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { resolve } from 'path';
+import { resolve, sep } from 'path';
 
 /**
  * Schema for SKILL.md frontmatter
@@ -59,7 +59,8 @@ export function validatePathSecurity(targetPath: string, targetDir: string): boo
 
   // Ensure target path starts with target directory + separator
   // This prevents attacks like /home/user/skills-evil matching /home/user/skills
-  return resolvedTargetPath.startsWith(resolvedTargetDir + '/');
+  // Use path.sep for cross-platform compatibility (Windows uses \, Unix uses /)
+  return resolvedTargetPath.startsWith(resolvedTargetDir + sep);
 }
 
 /**

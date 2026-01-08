@@ -11,34 +11,53 @@ import {
 describe('validation utilities', () => {
   describe('validatePathSecurity', () => {
     it('should allow paths within target directory', () => {
-      expect(validatePathSecurity('/home/user/skills/my-skill', '/home/user/skills')).toBe(true);
+      const targetDir = resolve('/home/user/skills');
+      const targetPath = resolve('/home/user/skills/my-skill');
+      expect(validatePathSecurity(targetPath, targetDir)).toBe(true);
     });
 
     it('should block path traversal with ../', () => {
-      expect(
-        validatePathSecurity('/home/user/skills/../../../etc/passwd', '/home/user/skills')
-      ).toBe(false);
+      const targetDir = resolve('/home/user/skills');
+      const targetPath = resolve('/home/user/skills/../../../etc/passwd');
+      expect(validatePathSecurity(targetPath, targetDir)).toBe(false);
     });
 
     it('should block paths outside target directory', () => {
-      expect(validatePathSecurity('/etc/passwd', '/home/user/skills')).toBe(false);
+      const targetDir = resolve('/home/user/skills');
+      const targetPath = resolve('/etc/passwd');
+      expect(validatePathSecurity(targetPath, targetDir)).toBe(false);
     });
 
     it('should block paths that are prefix but not subdirectory', () => {
       // /home/user/skills-evil should NOT be allowed when target is /home/user/skills
-      expect(validatePathSecurity('/home/user/skills-evil', '/home/user/skills')).toBe(false);
+      const targetDir = resolve('/home/user/skills');
+      const targetPath = resolve('/home/user/skills-evil');
+      expect(validatePathSecurity(targetPath, targetDir)).toBe(false);
     });
 
     it('should allow nested subdirectories', () => {
-      expect(validatePathSecurity('/home/user/skills/category/my-skill', '/home/user/skills')).toBe(
-        true
-      );
+      const targetDir = resolve('/home/user/skills');
+      const targetPath = resolve('/home/user/skills/category/my-skill');
+      expect(validatePathSecurity(targetPath, targetDir)).toBe(true);
     });
 
     it('should handle relative paths correctly', () => {
       const targetDir = resolve('/home/user/skills');
       const targetPath = resolve('/home/user/skills/my-skill');
       expect(validatePathSecurity(targetPath, targetDir)).toBe(true);
+    });
+
+    it('should work on Windows paths (drive letters and backslashes)', () => {
+      // Simulate Windows path by using resolve which will use correct separators
+      const targetDir = resolve('C:/Users/test/skills');
+      const targetPath = resolve('C:/Users/test/skills/my-skill');
+      expect(validatePathSecurity(targetPath, targetDir)).toBe(true);
+    });
+
+    it('should block Windows path traversal attempts', () => {
+      const targetDir = resolve('C:/Users/test/skills');
+      const targetPath = resolve('C:/Users/test/skills/../../../Windows/System32');
+      expect(validatePathSecurity(targetPath, targetDir)).toBe(false);
     });
   });
 
